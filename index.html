@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Amanda Bradshaw's GIS portfolio: a habitat suitability model for capybaras across South America, built in ArcGIS Pro.">
+<meta property="og:title" content="Where Capybaras Thrive | Amanda Bradshaw">
+<meta property="og:description" content="Habitat suitability model for Hydrochoerus hydrochaeris across South America, built in ArcGIS Pro.">
+<meta property="og:image" content="final-layout.jpg">
+<title>Amanda Bradshaw | GIS Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single reading column of field-report sections; maps break wider than the text column. */
+:root {
+  --ground: #f4f6f2;
+  --surface: #ffffff;
+  --ink: #18231d;
+  --muted: #56645b;
+  --rule: #d6ddd5;
+  --river: #1d6a86;
+  --s5: #2f8f4e; --s4: #86b84a; --s3: #e2c64a; --s2: #e58a3a; --s1: #c9473a; --s0: #8b2b2b;
+  --chip-ink: #10170f;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #111813; --surface: #18211b; --ink: #e6ece6; --muted: #9aa89e; --rule: #2c3830;
+    --river: #6cb7d3; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #111813; --surface: #18211b; --ink: #e6ece6; --muted: #9aa89e; --rule: #2c3830;
+  --river: #6cb7d3; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--ground); color: var(--ink);
+  font: 400 1.0625rem/1.65 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 2.5rem 4rem; display: grid; gap: 3.5rem; }
+.col { max-width: 68ch; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.12; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.6rem); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: clamp(1.45rem, 3vw, 1.85rem); font-weight: 700; }
+h3 { font-size: 1.1rem; font-weight: 500; }
+p { margin: 0; }
+.eyebrow { font: 500 0.78rem/1.3 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--river); }
+.muted { color: var(--muted); }
+em.sci { font-style: italic; }
+section { display: grid; gap: 1.1rem; }
+section > header { display: grid; gap: 0.35rem; border-top: 2px solid var(--ink); padding-top: 0.9rem; }
+
+/* Header */
+.top { display: grid; gap: 1.25rem; }
+.byline { display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; font: 400 0.86rem/1.4 var(--mono); color: var(--muted); }
+.byline b { color: var(--ink); font-weight: 500; }
+.lede { font-size: 1.2rem; line-height: 1.55; max-width: 60ch; }
+
+/* Hero map */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 2rem; align-items: center; }
+.hero figure { margin: 0; }
+.findings { display: grid; gap: 1rem; }
+.findings ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.55rem; }
+@media (max-width: 760px) { .hero { grid-template-columns: 1fr; } }
+
+/* Figures */
+figure { margin: 0; display: grid; gap: 0.5rem; }
+figure button { all: unset; cursor: zoom-in; display: block; border-radius: 4px; }
+figure button:focus-visible { outline: 3px solid var(--river); outline-offset: 3px; }
+figure img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); border-radius: 4px; background: #fff; }
+figcaption { font-size: 0.86rem; line-height: 1.45; color: var(--muted); }
+figcaption b { color: var(--ink); font-weight: 600; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+@media (max-width: 760px) { .grid-3, .grid-2 { grid-template-columns: 1fr; } }
+
+/* Data sources */
+.sources { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--rule); }
+.source { padding: 0.9rem 1rem 0.9rem 0; border-bottom: 1px solid var(--rule); display: grid; gap: 0.2rem; min-width: 0; }
+.source .layer { font: 500 0.8rem/1.3 var(--mono); color: var(--river); text-transform: uppercase; letter-spacing: 0.05em; }
+.source p { font-size: 0.95rem; }
+.source .cite { font-size: 0.8rem; color: var(--muted); }
+@media (max-width: 640px) { .sources { grid-template-columns: 1fr; } }
+
+/* Method steps (a real sequence) */
+ol.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; display: grid; gap: 0; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 3rem minmax(0, 1fr); gap: 0.75rem; padding: 0.9rem 0; border-bottom: 1px solid var(--rule); }
+ol.steps li::before { content: counter(s, decimal-leading-zero); font: 500 0.95rem/1.6 var(--mono); color: var(--river); }
+ol.steps h3 { margin-bottom: 0.2rem; }
+ol.steps p { font-size: 0.97rem; color: var(--muted); }
+.tool { font-family: var(--mono); font-size: 0.88em; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 0 0.3em; }
+
+/* Weights chart */
+.weights { display: grid; gap: 0.6rem; max-width: 640px; }
+.wrow { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr) 3rem; gap: 0.75rem; align-items: center; font-size: 0.95rem; }
+.wbar { height: 0.9rem; background: var(--rule); border-radius: 2px; position: relative; overflow: hidden; }
+.wbar span { position: absolute; inset: 0 auto 0 0; background: var(--river); border-radius: 2px; }
+.wval { font: 500 0.92rem/1 var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+.axis { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr) 3rem; gap: 0.75rem; font: 400 0.72rem/1 var(--mono); color: var(--muted); }
+.axis div { display: flex; justify-content: space-between; }
+
+/* Scoring tables */
+.tables { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 1.75rem; align-items: start; }
+.tables .stack { display: grid; gap: 1.75rem; }
+@media (max-width: 800px) { .tables { grid-template-columns: 1fr; } }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+caption { text-align: left; font: 700 1rem/1.3 var(--display); padding-bottom: 0.5rem; }
+th { text-align: left; font: 500 0.72rem/1.3 var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: 0.4rem 0.6rem 0.4rem 0; border-bottom: 1px solid var(--ink); }
+td { padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px solid var(--rule); vertical-align: top; font-variant-numeric: tabular-nums; }
+td.num { font-family: var(--mono); white-space: nowrap; }
+.chip { display: inline-grid; place-items: center; min-width: 1.7rem; height: 1.5rem; padding: 0 0.35rem; border-radius: 3px; font: 500 0.82rem/1 var(--mono); color: var(--chip-ink); }
+.c5 { background: var(--s5); color: #fff; } .c4 { background: var(--s4); } .c3 { background: var(--s3); }
+.c2 { background: var(--s2); } .c1 { background: var(--s1); color: #fff; } .c0 { background: var(--s0); color: #fff; }
+.scale { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; font-size: 0.85rem; color: var(--muted); align-items: center; }
+.scale span { display: inline-flex; gap: 0.4rem; align-items: center; }
+
+/* Skills */
+.skills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.skills li { list-style: none; font: 400 0.85rem/1 var(--mono); border: 1px solid var(--rule); background: var(--surface); padding: 0.5rem 0.65rem; border-radius: 3px; }
+ul.skills { margin: 0; padding: 0; }
+
+footer { border-top: 1px solid var(--rule); padding-top: 1.25rem; font-size: 0.85rem; color: var(--muted); display: grid; gap: 0.35rem; }
+
+/* Lightbox */
+dialog { border: 0; padding: 0; background: transparent; max-width: min(96vw, 1400px); max-height: 94vh; }
+dialog::backdrop { background: rgba(8, 12, 9, 0.82); }
+dialog img { max-width: min(96vw, 1400px); max-height: 86vh; width: auto; height: auto; display: block; background: #fff; border-radius: 4px; }
+dialog p { color: #e6ece6; font-size: 0.9rem; margin-top: 0.5rem; }
+dialog form { position: absolute; top: 0.5rem; right: 0.5rem; }
+dialog button { font: 500 0.85rem/1 var(--mono); background: #18231d; color: #fff; border: 1px solid #ffffff55; border-radius: 3px; padding: 0.5rem 0.7rem; cursor: pointer; }
+@media (prefers-reduced-motion: no-preference) { figure img { transition: filter .15s; } figure button:hover img { filter: brightness(0.96); } }
+</style>
+<style>body{margin:0} img{max-width:100%} [hidden]{display:none!important}</style>
+</head>
+<body>
+
+<main class="wrap">
+
+  <div class="top">
+    <p class="eyebrow">GIS Portfolio · Amanda Bradshaw</p>
+    <h1>Where Capybaras Thrive</h1>
+    <p class="lede">A habitat suitability model for the capybara (<em class="sci">Hydrochoerus hydrochaeris</em>) across South America, combining river density, climate, landform, and elevation into one weighted suitability surface.</p>
+    <div class="byline">
+      <span><b>Course</b> GIS 250: Intro GIS &amp; Spatial Analysis, BYU-Idaho</span>
+      <span><b>Term</b> Spring 2024</span>
+      <span><b>Software</b> ArcGIS Pro</span>
+    </div>
+  </div>
+
+  <div class="hero">
+    <figure>
+      <button type="button" data-full="suitability-surface.jpg" data-cap="Final habitat suitability surface: Weighted Sum of reclassified river density, bioclimate, landform, and elevation layers. Higher values (green) are more suitable."><img src="suitability-surface.jpg" alt="Map of South America shaded from green (most suitable) to red (least suitable) capybara habitat; green dominates the Amazon Basin and central lowlands, red follows the Andes." width="624" height="808"></button>
+      <figcaption><b>Final suitability surface.</b> Weighted Sum output; green is most suitable, red least.</figcaption>
+    </figure>
+    <div class="findings">
+      <p class="eyebrow">Key findings</p>
+      <ul>
+        <li>The most suitable habitat sits in <b>low to mid-elevation areas with high river density</b>, especially the Amazon Basin and the Pantanal wetlands.</li>
+        <li>The top-scoring regions combine <b>abundant water sources with favorable land cover</b>.</li>
+        <li>The model flagged <b>potential conservation and expansion areas</b> both inside and outside the species' current known range.</li>
+      </ul>
+    </div>
+  </div>
+
+  <section>
+    <header>
+      <p class="eyebrow">The question</p>
+      <h2>Which habitat features define where capybaras live?</h2>
+    </header>
+    <div class="col" style="display:grid;gap:0.9rem">
+      <p>Capybaras are semi-aquatic grazers tied to rivers, marshes, and seasonally flooded lowlands. This project translated those habitat needs into a spatial model: score each landscape factor by how well it supports capybaras, weight the factors by importance, and combine them into a single suitability map to compare against the species' known range.</p>
+      <p class="muted">The original proposal also set out to map habitat overlap with the capybara's predators: jaguars, green anacondas, and spectacled caimans. The final project focused on capybara habitat itself.</p>
+    </div>
+  </section>
+
+  <section>
+    <header>
+      <p class="eyebrow">Data</p>
+      <h2>Sources</h2>
+    </header>
+    <div class="sources">
+      <div class="source">
+        <span class="layer">Species range</span>
+        <p>Capybara distribution from the IUCN Red List and GBIF</p>
+      </div>
+      <div class="source">
+        <span class="layer">Rivers</span>
+        <p>HydroSHEDS South America river network (30 arc-second), via Data Basin</p>
+        <span class="cite">Lehner, B., Verdin, K., Jarvis, A. (2006). HydroSHEDS Technical Documentation. World Wildlife Fund US.</span>
+      </div>
+      <div class="source">
+        <span class="layer">Landform / land cover</span>
+        <p>South America Land Surface Forms, Esri Living Atlas</p>
+      </div>
+      <div class="source">
+        <span class="layer">Climate</span>
+        <p>World Bioclimates (temperature and precipitation regimes), Esri Living Atlas</p>
+      </div>
+      <div class="source">
+        <span class="layer">Elevation</span>
+        <p>30 arc-second DEM of South America, via Data Basin</p>
+        <span class="cite">USGS EROS, NASA, UNEP/GRID, USAID, INEGI, GSI Japan, Manaaki Whenua Landcare Research, and SCAR.</span>
+      </div>
+      <div class="source">
+        <span class="layer">Water bodies</span>
+        <p>Water body features, Esri Living Atlas and Data Basin</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <header>
+      <p class="eyebrow">Inputs</p>
+      <h2>The raw habitat layers</h2>
+    </header>
+    <div class="grid-3">
+      <figure>
+        <button type="button" data-full="river-density.jpg" data-cap="River density across South America, derived from the HydroSHEDS river network with the Line Density tool."><img src="river-density.jpg" alt="Map of river density across South America in shades of blue." width="1318" height="800" loading="lazy"></button>
+        <figcaption><b>River density.</b> Line Density from the HydroSHEDS network.</figcaption>
+      </figure>
+      <figure>
+        <button type="button" data-full="bioclimates.jpg" data-cap="South American bioclimates with the capybara distribution outlined."><img src="bioclimates.jpg" alt="Map of South American bioclimate zones in colored categories, with the capybara range outlined in black." width="1400" height="850" loading="lazy"></button>
+        <figcaption><b>Bioclimates.</b> With the capybara range outlined.</figcaption>
+      </figure>
+      <figure>
+        <button type="button" data-full="land-surface-forms.jpg" data-cap="Land surface forms (plains, hills, mountains, valleys, floodplains) from the Esri Living Atlas."><img src="land-surface-forms.jpg" alt="Detailed map of land surface form categories such as plains, hills, mountains, and floodplains." width="1400" height="850" loading="lazy"></button>
+        <figcaption><b>Land surface forms.</b> Plains through mountains and floodplains.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <header>
+      <p class="eyebrow">Scoring</p>
+      <h2>How each factor was rated</h2>
+    </header>
+    <p class="col">Each raster was reclassified to a common suitability scale based on capybara habitat needs, from 5 (highly suitable) down to 1 (unsuitable). Elevations above 1,000 m were scored 0 to exclude them.</p>
+    <div class="scale" aria-label="Suitability scale">
+      <span><i class="chip c5">5</i> Highly suitable</span>
+      <span><i class="chip c4">4</i> Suitable</span>
+      <span><i class="chip c3">3</i> Moderate</span>
+      <span><i class="chip c2">2</i> Marginal</span>
+      <span><i class="chip c1">1</i> Unsuitable</span>
+      <span><i class="chip c0">0</i> Excluded</span>
+    </div>
+    <div class="tables">
+      <div class="tbl">
+        <table>
+          <caption>Bioclimate</caption>
+          <thead><tr><th>Bioclimate</th><th>Common name</th><th>Avg temp (°C)</th><th>Avg precip (mm)</th><th>Score</th></tr></thead>
+          <tbody>
+            <tr><td>Tropical Pluvial</td><td>Tropical rainforest</td><td class="num">20 to 30</td><td class="num">&gt;2,000</td><td><span class="chip c5">5</span></td></tr>
+            <tr><td>Tropical Pluviseasonal</td><td>Tropical seasonal forest</td><td class="num">20 to 30</td><td class="num">1,000–2,000</td><td><span class="chip c4">4</span></td></tr>
+            <tr><td>Tropical Xeric</td><td>Tropical dry forest</td><td class="num">20 to 30</td><td class="num">500–1,000</td><td><span class="chip c3">3</span></td></tr>
+            <tr><td>Mediterranean Pluviseasonal</td><td>Wet/dry season climate</td><td class="num">10 to 25</td><td class="num">500–1,000</td><td><span class="chip c3">3</span></td></tr>
+            <tr><td>Mediterranean Xeric Oceanic</td><td>Mediterranean scrubland</td><td class="num">10 to 25</td><td class="num">200–500</td><td><span class="chip c2">2</span></td></tr>
+            <tr><td>Temperate Hyperoceanic/Oceanic</td><td>Temperate rainforest</td><td class="num">5 to 15</td><td class="num">1,000–2,000</td><td><span class="chip c2">2</span></td></tr>
+            <tr><td>Tropical Desertic/Hyperdesertic</td><td>Tropical desert</td><td class="num">20 to 30</td><td class="num">&lt;500</td><td><span class="chip c1">1</span></td></tr>
+            <tr><td>Mediterranean Desertic/Hyperdesertic</td><td>Mediterranean desert</td><td class="num">10 to 25</td><td class="num">&lt;200</td><td><span class="chip c1">1</span></td></tr>
+            <tr><td>Temperate Xeric</td><td>Temperate drylands</td><td class="num">5 to 15</td><td class="num">500–1,000</td><td><span class="chip c1">1</span></td></tr>
+            <tr><td>Boreal Hyperoceanic</td><td>Boreal rainforest</td><td class="num">−5 to 5</td><td class="num">500–1,500</td><td><span class="chip c1">1</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="stack">
+        <div class="tbl">
+          <table>
+            <caption>Land surface form</caption>
+            <thead><tr><th>Landform</th><th>Score</th></tr></thead>
+            <tbody>
+              <tr><td>Plain</td><td><span class="chip c5">5</span></td></tr>
+              <tr><td>Valley</td><td><span class="chip c5">5</span></td></tr>
+              <tr><td>Floodplain</td><td><span class="chip c5">5</span></td></tr>
+              <tr><td>Rolling plain</td><td><span class="chip c4">4</span></td></tr>
+              <tr><td>Coastal plain</td><td><span class="chip c4">4</span></td></tr>
+              <tr><td>Hill</td><td><span class="chip c3">3</span></td></tr>
+              <tr><td>Plateau</td><td><span class="chip c3">3</span></td></tr>
+              <tr><td>Mountain</td><td><span class="chip c1">1</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl">
+          <table>
+            <caption>Elevation</caption>
+            <thead><tr><th>Range (m)</th><th>Score</th></tr></thead>
+            <tbody>
+              <tr><td class="num">0–200</td><td><span class="chip c5">5</span></td></tr>
+              <tr><td class="num">201–500</td><td><span class="chip c4">4</span></td></tr>
+              <tr><td class="num">501–1,000</td><td><span class="chip c3">3</span></td></tr>
+              <tr><td class="num">&gt;1,000</td><td><span class="chip c0">0</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:0.5rem">
+      <figure>
+        <button type="button" data-full="bioclimate-suitability.jpg" data-cap="Reclassified bioclimate suitability over hillshade, with the capybara range outlined."><img src="bioclimate-suitability.jpg" alt="South America shaded by reclassified bioclimate suitability, green across the tropics and red in the far south and Andes, with the capybara range outlined." width="624" height="808" loading="lazy"></button>
+        <figcaption><b>Bioclimate, reclassified.</b> Over hillshade, range outlined.</figcaption>
+      </figure>
+      <figure>
+        <button type="button" data-full="landcover-suitability.jpg" data-cap="Reclassified land surface form / land cover suitability over hillshade, with the capybara range outlined."><img src="landcover-suitability.jpg" alt="South America shaded by reclassified landform suitability, green across lowlands and red along the Andes, with the capybara range outlined." width="624" height="808" loading="lazy"></button>
+        <figcaption><b>Land cover, reclassified.</b> Over hillshade, range outlined.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <header>
+      <p class="eyebrow">Weighting</p>
+      <h2>What mattered most</h2>
+    </header>
+    <p class="col">Capybaras depend on water, so river density carried the most weight in the Weighted Sum, followed by climate, land cover, and elevation.</p>
+    <div class="weights" role="img" aria-label="Weighted Sum weights: river density 1.5, climate 1.25, land cover 1.0, elevation 0.75">
+      <div class="wrow"><span>River density</span><div class="wbar"><span style="width:100%"></span></div><span class="wval">1.50</span></div>
+      <div class="wrow"><span>Climate</span><div class="wbar"><span style="width:83.33%"></span></div><span class="wval">1.25</span></div>
+      <div class="wrow"><span>Land cover</span><div class="wbar"><span style="width:66.67%"></span></div><span class="wval">1.00</span></div>
+      <div class="wrow"><span>Elevation</span><div class="wbar"><span style="width:50%"></span></div><span class="wval">0.75</span></div>
+      <div class="axis" aria-hidden="true"><span></span><div><span>0</span><span>0.75</span><span>1.5</span></div><span></span></div>
+    </div>
+  </section>
+
+  <section>
+    <header>
+      <p class="eyebrow">Method</p>
+      <h2>Analysis workflow</h2>
+    </header>
+    <ol class="steps col">
+      <li><div><h3>Clip to the study range</h3><p>Clipped river features and other habitat data to the area where capybaras are known to live, using <span class="tool">Clip</span>.</p></div></li>
+      <li><div><h3>Map the raw habitat features</h3><p>Built initial layouts of elevation, rivers, bioclimate, and land cover before any reclassification.</p></div></li>
+      <li><div><h3>Reclassify for suitability</h3><p>Used <span class="tool">Reclassify</span> to convert the elevation, land cover, and climate rasters to the shared suitability scale.</p></div></li>
+      <li><div><h3>Derive river density</h3><p>Ran <span class="tool">Line Density</span> on the river network, reclassified the result to the same value range, and clipped it to the capybara range.</p></div></li>
+      <li><div><h3>Standardize symbology</h3><p>Applied a continuous blue ramp to river density and a red–yellow–green ramp to every suitability layer, so all maps read the same way.</p></div></li>
+      <li><div><h3>Combine with a Weighted Sum</h3><p>Combined the reclassified layers with <span class="tool">Weighted Sum</span> into one habitat suitability surface.</p></div></li>
+      <li><div><h3>Compare against the known range</h3><p>Mapped the reclassified layers before clipping, overlaid the capybara range, and examined suitability scores outside it to find potential expansion and conservation areas.</p></div></li>
+    </ol>
+  </section>
+
+  <section>
+    <header>
+      <p class="eyebrow">Beyond the range</p>
+      <h2>Looking south of the known range</h2>
+    </header>
+    <p class="col">The analysis also examined habitat features and suitability scores outside the current range, to identify regions with potential for range expansion or conservation. These maps show elevation and landforms across southern South America.</p>
+    <div class="grid-2">
+      <figure>
+        <button type="button" data-full="elevation-south.jpg" data-cap="Elevation across southern South America, outside the capybara's known range."><img src="elevation-south.jpg" alt="Map of elevation across southern South America, with high Andes in dark red and lowlands in green." width="723" height="559" loading="lazy"></button>
+        <figcaption><b>Elevation, southern cone.</b></figcaption>
+      </figure>
+      <figure>
+        <button type="button" data-full="landforms-south.jpg" data-cap="Land surface forms / land cover across southern South America, outside the capybara's known range."><img src="landforms-south.jpg" alt="Map of land surface forms across southern South America, with mountains in red and plains in green." width="715" height="552" loading="lazy"></button>
+        <figcaption><b>Landforms, southern cone.</b></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <header>
+      <p class="eyebrow">Deliverable</p>
+      <h2>Final map layout</h2>
+    </header>
+    <figure>
+      <button type="button" data-full="final-layout.jpg" data-cap="Final layout: Capybara Habitat Suitability Analysis: Optimal Areas and Key Features in South America."><img src="final-layout.jpg" alt="Final map layout titled Capybara Habitat Suitability Analysis, showing the suitability surface for South America with a locator inset, legend, scale bar, key findings, and methods text." width="1400" height="1082" loading="lazy"></button>
+      <figcaption><b>Capybara Habitat Suitability Analysis: Optimal Areas and Key Features in South America.</b> Final layout with locator inset, legend, scale bar, findings, and method summary. Select any map to enlarge it.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <header>
+      <p class="eyebrow">Skills shown</p>
+      <h2>Tools and techniques</h2>
+    </header>
+    <ul class="skills">
+      <li>ArcGIS Pro</li>
+      <li>Raster reclassification</li>
+      <li>Weighted overlay / Weighted Sum</li>
+      <li>Line Density</li>
+      <li>Clip and geoprocessing</li>
+      <li>Habitat suitability modeling</li>
+      <li>Map layout and cartography</li>
+      <li>Data sourcing and citation</li>
+      <li>ArcGIS StoryMaps</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p><b>Amanda Bradshaw</b> · Final project for GIS 250, BYU-Idaho, Spring 2024. Originally published as an ArcGIS StoryMap.</p>
+    <p>Basemaps: Esri, TomTom, Garmin, FAO, NOAA, USGS.</p>
+  </footer>
+</main>
+
+<dialog id="lightbox" aria-label="Enlarged map">
+  <form method="dialog"><button type="submit" id="lightbox-close">Close</button></form>
+  <img id="lightbox-img" alt="">
+  <p id="lightbox-cap"></p>
+</dialog>
+
+<script>
+(function () {
+  var dlg = document.getElementById('lightbox');
+  var img = document.getElementById('lightbox-img');
+  var cap = document.getElementById('lightbox-cap');
+  if (!dlg || typeof dlg.showModal !== 'function') return;
+  document.querySelectorAll('figure button[data-full]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      img.src = b.getAttribute('data-full');
+      var inner = b.querySelector('img');
+      img.alt = inner ? inner.alt : '';
+      cap.textContent = b.getAttribute('data-cap') || '';
+      dlg.showModal();
+    });
+  });
+  dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+})();
+</script>
+
+</body>
+</html>
